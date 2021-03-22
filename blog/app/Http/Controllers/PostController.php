@@ -1,14 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\StorePostRequest2;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
-{
+{ 
     public function index()
-    {
+    { 
         $posts = Post::paginate(2);
         return view('posts.index', compact('posts'));
     }
@@ -27,15 +29,20 @@ class PostController extends Controller
             'users' => User::all()
         ]);
     }
+    public function edit(Post $post){
+        $users = User::all();
+        return view('posts.edit', compact('post', 'users'));
+    }
 
-    public function edit (Post $post, Request $request){
-      
-         $post->edit($request->all());
+    public function update(Post $post, StorePostRequest2 $request){
+        $post->update($request->all());
         return redirect()->route('posts.index');
     }
 
-    public function store(Request $request) // == calling request()
-    {
+    public function store(StorePostRequest $request) // == calling request()
+    {   
+        //validation logic 
+
         $requestData = $request->all();
         Post::create($requestData);
         return redirect()->route('posts.index');
