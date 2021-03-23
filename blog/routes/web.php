@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,3 +34,46 @@ Route::group(['middleware' => ['auth']],function(){
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/auth/redirect', function () {
+    return Socialite::driver('github')->redirect();
+});
+
+Route::get('/auth/callback', function () {
+    $user = Socialite::driver('github')->stateless()->user();
+    $exists = User::where('email', '=', $user->email)->first();
+    if($exists) {
+        Auth::login($exists, true);
+        return redirect()->route('posts.index');
+    } else {
+        $user = User::create([
+            'name'  => $user->nickname,
+            'email' => $user->email,
+            'password' => Hash::make('12345678')
+        ]);
+        Auth::login($user, true);
+        return redirect()->route('posts.index');
+    }
+});
+
+
+Route::get('/auth/redirect/google', function () {
+    return Socialite::driver('google')->redirect();
+});
+
+Route::get('/auth/callback/google', function () {
+    $user = Socialite::driver('google')->stateless()->user();
+    $exists = User::where('email', '=', $user->email)->first();
+    if($exists) {
+        Auth::login($exists, true);
+        return redirect()->route('posts.index');
+    } else {
+        $user = User::create([
+            'name'  => $user->name,
+            'email' => $user->email,
+            'password' => Hash::make('12345678')
+        ]);
+        Auth::login($user, true);
+        return redirect()->route('posts.index');
+    }
+});

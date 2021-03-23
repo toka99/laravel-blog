@@ -29,7 +29,7 @@ class Post extends Model
         'slug'
     ];
 
-
+    protected $with = ['user'];
     public function user() //foreign key user_id
     {
         return $this->belongsTo(User::class);
